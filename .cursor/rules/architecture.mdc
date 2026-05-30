@@ -1,0 +1,51 @@
+---
+description: repo-audit-skills layout, audit context flow, ide-agents compatibility
+alwaysApply: true
+---
+
+# repo-audit-skills architecture
+
+Git catalog of **Cursor skills and agents** for repository audits. Installed via [ide-agents](https://github.com/sergeychernov/ide-agents) as symlinks (Global or Project).
+
+## Layout
+
+```
+repo-audit-skills/
+├── skills/
+│   └── <skill-name>/
+│       ├── SKILL.md
+│       ├── scripts/          # optional — bundled helpers
+│       └── assets/           # optional — markers, checklists
+└── agents/                   # optional — *.md subagent personas
+```
+
+Nested layout only: `skills/<name>/SKILL.md`. Flat root layout is not used here.
+
+## Audit context in target repos
+
+Skills write runtime context into the **audited project**, not into this catalog:
+
+```
+<target-repo>/
+└── .audit/
+    ├── profile.json          # stack profile (audit-init)
+    └── reports/              # *.json reports (gitignore optional)
+```
+
+Downstream skills **read** `.audit/profile.json` first; they do not re-detect the stack. All `.audit/` artifacts are **JSON only** — see `audit-artifacts.mdc`. JSON Schemas stay in `skills/*/assets/`, not in `.audit/`.
+
+## Scope conventions
+
+| Skill kind | Typical `scope` |
+|------------|-------------------|
+| `audit-init`, dimension audits | `project` — context lives in target repo |
+| Generic reviewers | `any` or `global` |
+
+Project-scoped installs symlink into `<target>/.cursor/skills/`.
+
+## Principles
+
+- Scripts are read-only auditors by default — no code changes in the target repo.
+- No network calls, no `node_modules` access in scan scripts.
+- Deterministic output: same repo state → same profile/findings.
+- Generic tooling only — no corporate or private audit criteria in this repo.

@@ -1,0 +1,23 @@
+# Dependencies (if scripts get a local package.json for dev)
+node_modules/
+
+# Local audit-init test runs against this repo
+.audit/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+*.swp
+*.swo
+*~

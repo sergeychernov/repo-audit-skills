@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sergeychernov/repo-audit-skills/skills/audit-init/assets/profile.schema.json",
+  "title": "AuditProfile",
+  "description": "Stack profile written by audit-init into .audit/profile.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "repo", "languages", "stack", "audit"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Profile schema version"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when the profile was generated"
+    },
+    "repo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "root", "primaryLanguage", "monorepo", "packageJsonCount"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Repository directory name"
+        },
+        "root": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Absolute path to the git repository root"
+        },
+        "primaryLanguage": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Dominant language by tracked source file count"
+        },
+        "monorepo": {
+          "type": "boolean"
+        },
+        "monorepoSignals": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "packageJsonCount": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "languages": {
+      "type": "object",
+      "description": "Language id → tracked source file count",
+      "additionalProperties": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runtime"],
+      "properties": {
+        "runtime": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "node": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Node.js version from .nvmrc, .node-version, or engines.node"
+            }
+          }
+        },
+        "packageManager": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "enum": ["npm", "yarn", "pnpm", "bun"]
+            },
+            "version": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "frameworks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "bundlers": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "testRunners": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "linters": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "databases": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      }
+    },
+    "audit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "exclude"],
+      "properties": {
+        "scope": {
+          "type": "string",
+          "enum": ["full", "quick", "security-only", "architecture-only"]
+        },
+        "exclude": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "description": "Path globs skipped by downstream audit skills"
+        }
+      }
+    }
+  }
+}

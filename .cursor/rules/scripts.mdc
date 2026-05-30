@@ -1,0 +1,50 @@
+---
+description: Conventions for audit skill scripts (detect-stack, scanners)
+globs: skills/**/scripts/**
+alwaysApply: false
+---
+
+# Audit scripts
+
+## Runtime
+
+- ESM: `*.mjs`, `#!/usr/bin/env node`
+- Node 18+, zero npm dependencies
+- Resolve assets via `import.meta.url` — never assume cwd for skill paths
+
+```javascript
+const here = dirname(fileURLToPath(import.meta.url));
+const assetsDir = join(here, '..', 'assets');
+```
+
+## Target repo discovery
+
+```javascript
+const repoRoot = execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).trim();
+process.chdir(repoRoot);
+```
+
+Exit `1` with a clear message if not a git repo.
+
+## Scan rules
+
+- Prefer `git ls-files` over filesystem walks
+- Read-only: do not modify source files in the target repo
+- Exception: write only under `.audit/` (with `--force` guard for overwrites)
+- No network, no shelling out to package managers
+
+## CLI flags (standard across skills)
+
+| Flag | Effect |
+|------|--------|
+| `--json` | Machine-readable stdout |
+| `--dry-run` | Scan without writing `.audit/` |
+| `--force` | Overwrite existing `.audit/profile.json` |
+
+## Output
+
+Human mode: short labeled summary for terminal. JSON mode: `{ profile, profilePath }` or equivalent.
+
+Write `.audit/*.json` with 2-space indent and trailing newline. Validate against `assets/*.schema.json` in the skill folder before write — do not copy schemas into `.audit/`.
+
+Extend detection lists in `assets/*.json` in this repo — never patch markers in the target project.

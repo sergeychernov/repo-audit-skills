@@ -1,0 +1,48 @@
+{
+  "frameworks": {
+    "react": ["react", "react-dom", "react-native"],
+    "vue": ["vue", "nuxt", "@nuxt/kit"],
+    "angular": ["@angular/core"],
+    "svelte": ["svelte", "@sveltejs/kit"],
+    "next": ["next"],
+    "remix": ["@remix-run/node", "@remix-run/react"],
+    "fastify": ["fastify"],
+    "express": ["express"],
+    "nestjs": ["@nestjs/core"],
+    "hono": ["hono"],
+    "django": ["django"],
+    "flask": ["flask"],
+    "fastapi": ["fastapi"],
+    "spring": ["org.springframework:spring-core"]
+  },
+  "bundlers": {
+    "webpack": ["webpack"],
+    "rspack": ["@rspack/core", "@rsbuild/core"],
+    "vite": ["vite"],
+    "esbuild": ["esbuild"],
+    "rollup": ["rollup"],
+    "parcel": ["parcel"],
+    "turbo": ["turbo"]
+  },
+  "testRunners": {
+    "jest": ["jest", "@jest/core"],
+    "vitest": ["vitest"],
+    "mocha": ["mocha"],
+    "playwright": ["@playwright/test", "playwright"],
+    "cypress": ["cypress"],
+    "pytest": ["pytest"],
+    "go-test": ["testing"]
+  },
+  "linters": {
+    "eslint": ["eslint"],
+    "prettier": ["prettier"],
+    "ruff": ["ruff"],
+    "golangci-lint": ["golangci-lint"]
+  },
+  "databases": {
+    "postgres": ["pg", "postgres", "@prisma/client", "prisma"],
+    "mysql": ["mysql", "mysql2"],
+    "mongodb": ["mongodb", "mongoose"],
+    "redis": ["redis", "ioredis"]
+  }
+}

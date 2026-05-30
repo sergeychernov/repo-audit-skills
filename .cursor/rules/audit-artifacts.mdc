@@ -1,0 +1,34 @@
+---
+description: ".audit/ artifacts — JSON-only format, schema, layout"
+alwaysApply: true
+---
+
+# .audit artifacts (JSON only)
+
+All runtime files under `.audit/` in the **target repository** must be **formatted JSON** (2-space indent, trailing newline). No YAML, no Markdown reports in this folder.
+
+## Layout
+
+```
+<target-repo>/.audit/
+├── profile.json            # stack profile (audit-init)
+└── reports/
+    ├── latest.json         # consolidated audit report
+    └── <dimension>.json    # per-skill findings (architecture, security, …)
+```
+
+JSON Schemas live **only in this catalog** under `skills/<skill>/assets/*.schema.json` — never copied into `.audit/`.
+
+## Conventions
+
+| Rule | Detail |
+|------|--------|
+| Format | `JSON.stringify(data, null, 2) + '\n'` |
+| Schema | `skills/<skill>/assets/<artifact>.schema.json` — source of truth in the skill folder |
+| Validation | Scripts validate against the skill's schema before writing to `.audit/` |
+| Read order | Downstream skills read `.audit/profile.json` first; never re-detect stack |
+
+## Git
+
+- Commit `profile.json` when sharing audit context across the team.
+- Add `.audit/reports/` to `.gitignore` if reports are ephemeral.

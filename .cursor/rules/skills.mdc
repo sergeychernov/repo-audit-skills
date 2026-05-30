@@ -1,0 +1,49 @@
+---
+description: SKILL.md and agent authoring conventions for audit skills
+globs: skills/**/*
+alwaysApply: false
+---
+
+# Skill authoring
+
+## SKILL.md frontmatter
+
+Required: `name`, `description`. Audit skills default to `scope: project`.
+
+```yaml
+---
+name: my-audit-skill
+description: >-
+  Third-person description with WHAT and WHEN (trigger phrases).
+  Use when the user asks for …
+scope: project
+---
+```
+
+`description` is used for agent discovery — include Russian trigger phrases when relevant.
+
+## Folder layout
+
+```
+skills/<name>/
+├── SKILL.md
+├── scripts/       # node *.mjs helpers; run from target repo cwd
+├── assets/        # JSON checklists, markers — edit here, not in target repo
+└── references/    # optional long-form docs
+```
+
+Scripts and assets live **inside the skill folder**, never in the target project.
+
+## SKILL.md body structure
+
+1. **Purpose** — one paragraph
+2. **Skill layout** — show `<SKILL_DIR>/` tree
+3. **Quick start** — copy-pasteable `node <SKILL_DIR>/scripts/….mjs`
+4. **Workflow** — checkbox checklist
+5. **Agent instructions** — explicit steps for the agent (resolve SKILL_DIR, run script, read profile)
+
+Reference `.audit/profile.json` fields when the skill depends on `audit-init`. Report outputs go to `.audit/reports/*.json` — see `audit-artifacts.mdc`.
+
+## Agents (`agents/*.md`)
+
+Optional YAML frontmatter: `name`, `description`, `scope`. Body defines a strict read-only contract and structured report format (🔴/🟡/🟢), similar to migration verifiers.

@@ -4,6 +4,35 @@
   "title": "AuditProfile",
   "description": "Stack profile written by audit-init into .audit/profile.json",
   "type": "object",
+  "$defs": {
+    "stackItemVersions": {
+      "type": "array",
+      "description": "Unique semver values from all package.json files; [null] when detected but version is unknown",
+      "items": {
+        "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+      },
+      "minItems": 1
+    },
+    "stackItems": {
+      "type": "object",
+      "description": "Stack item id → unique detected versions",
+      "additionalProperties": { "$ref": "#/$defs/stackItemVersions" }
+    },
+    "agentToolEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signals"],
+      "properties": {
+        "signals": {
+          "type": "array",
+          "description": "Matched paths (exact files) or categories (directory prefixes from markers)",
+          "items": { "type": "string", "minLength": 1 },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      }
+    }
+  },
   "additionalProperties": false,
   "required": ["version", "generatedAt", "repo", "languages", "stack", "audit"],
   "properties": {
@@ -90,38 +119,20 @@
             }
           }
         },
-        "frameworks": {
-          "type": "object",
-          "description": "Framework id → detected semver (null when unknown)",
-          "additionalProperties": {
-            "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
-          }
-        },
-        "bundlers": {
-          "type": "object",
-          "description": "Bundler id → detected semver (null when unknown)",
-          "additionalProperties": {
-            "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
-          }
-        },
-        "testRunners": {
-          "type": "object",
-          "description": "Test runner id → detected semver (null when unknown)",
-          "additionalProperties": {
-            "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
-          }
-        },
-        "linters": {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 },
-          "uniqueItems": true
-        },
-        "databases": {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 },
-          "uniqueItems": true
-        }
+        "frameworks": { "$ref": "#/$defs/stackItems" },
+        "bundlers": { "$ref": "#/$defs/stackItems" },
+        "testRunners": { "$ref": "#/$defs/stackItems" },
+        "uiLibraries": { "$ref": "#/$defs/stackItems" },
+        "componentCatalogs": { "$ref": "#/$defs/stackItems" },
+        "formLibraries": { "$ref": "#/$defs/stackItems" },
+        "linters": { "$ref": "#/$defs/stackItems" },
+        "databases": { "$ref": "#/$defs/stackItems" }
       }
+    },
+    "agentTooling": {
+      "type": "object",
+      "description": "AI coding assistants — detected config files and rule directories (git-tracked only)",
+      "additionalProperties": { "$ref": "#/$defs/agentToolEntry" }
     },
     "audit": {
       "type": "object",

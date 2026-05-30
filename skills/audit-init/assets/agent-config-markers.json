@@ -1,0 +1,76 @@
+{
+  "cursor": {
+    "files": [".cursorrules", "AGENTS.md", ".cursor/hooks.json", ".cursor/mcp.json"],
+    "prefixes": {
+      "rules": ".cursor/rules/",
+      "skills": ".cursor/skills/",
+      "agents": ".cursor/agents/"
+    }
+  },
+  "claude": {
+    "files": ["CLAUDE.md", ".claude/settings.json", ".claude/settings.local.json"],
+    "prefixes": {
+      "commands": ".claude/commands/",
+      "skills": ".claude/skills/"
+    }
+  },
+  "codex": {
+    "files": ["CODEX.md", ".codex/config.toml", ".codex/config.json", "AGENTS.md"],
+    "prefixes": {
+      "config": ".codex/"
+    }
+  },
+  "github-copilot": {
+    "files": [".github/copilot-instructions.md"],
+    "prefixes": {
+      "instructions": ".github/instructions/"
+    }
+  },
+  "windsurf": {
+    "files": [".windsurfrules"],
+    "prefixes": {
+      "rules": ".windsurf/rules/"
+    }
+  },
+  "continue": {
+    "files": [".continuerc.json", ".continue/config.json", ".continue/config.yaml", ".continue/config.yml"]
+  },
+  "aider": {
+    "files": [".aider.conf.yml", ".aider.conf.yaml", ".aiderignore", "CONVENTIONS.md"]
+  },
+  "gemini": {
+    "files": ["GEMINI.md", ".gemini/settings.json"],
+    "prefixes": {
+      "config": ".gemini/"
+    }
+  },
+  "opencode": {
+    "files": ["opencode.json", ".opencode.json", "OPENCODE.md"],
+    "prefixes": {
+      "config": ".opencode/"
+    }
+  },
+  "jetbrains-ai": {
+    "files": [".junie/guidelines.md"],
+    "prefixes": {
+      "guidelines": ".junie/"
+    }
+  },
+  "amazon-q": {
+    "prefixes": {
+      "rules": ".amazonq/"
+    }
+  },
+  "cline": {
+    "files": [".clinerules"],
+    "prefixes": {
+      "rules": ".cline/rules/"
+    }
+  },
+  "zed": {
+    "files": [".rules", ".zed/settings.json"],
+    "prefixes": {
+      "rules": ".zed/rules/"
+    }
+  }
+}

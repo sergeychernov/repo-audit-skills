@@ -59,5 +59,164 @@
     "mysql": ["mysql", "mysql2"],
     "mongodb": ["mongodb", "mongoose"],
     "redis": ["redis", "ioredis"]
+  },
+  "uiLibraries": {
+    "mui": { "packages": ["@mui/material", "@material-ui/core"] },
+    "antd": { "packages": ["antd"] },
+    "chakra-ui": { "packages": ["@chakra-ui/react"] },
+    "mantine": { "packages": ["@mantine/core"] },
+    "radix-ui": {
+      "packages": [
+        "@radix-ui/react-dialog",
+        "@radix-ui/react-dropdown-menu",
+        "@radix-ui/react-popover",
+        "@radix-ui/react-slot"
+      ]
+    },
+    "headless-ui": { "packages": ["@headlessui/react", "@headlessui/vue"] },
+    "tailwindcss": { "packages": ["tailwindcss", "@tailwindcss/vite", "@tailwindcss/postcss"] },
+    "styled-components": { "packages": ["styled-components"] },
+    "emotion": { "packages": ["@emotion/react", "@emotion/styled"] },
+    "bootstrap": { "packages": ["bootstrap", "react-bootstrap", "bootstrap-vue-next"] },
+    "primereact": { "packages": ["primereact", "primevue"] },
+    "fluent-ui": { "packages": ["@fluentui/react-components", "@fluentui/react"] },
+    "carbon": { "packages": ["@carbon/react", "carbon-components-react"] },
+    "polaris": { "packages": ["@shopify/polaris"] },
+    "blueprint": { "packages": ["@blueprintjs/core"] },
+    "semantic-ui": { "packages": ["semantic-ui-react"] },
+    "vuetify": { "packages": ["vuetify"] },
+    "element-plus": { "packages": ["element-plus"] },
+    "quasar": { "packages": ["quasar", "@quasar/extras"] },
+    "naive-ui": { "packages": ["naive-ui"] },
+    "arco-design": { "packages": ["@arco-design/web-react", "@arco-design/web-vue"] },
+    "nextui": { "packages": ["@nextui-org/react", "@heroui/react"] },
+    "daisyui": { "packages": ["daisyui"] },
+    "shadcn": {
+      "packages": [],
+      "files": ["components.json"]
+    }
+  },
+  "componentCatalogs": {
+    "storybook": {
+      "packages": [
+        "storybook",
+        "@storybook/react",
+        "@storybook/react-vite",
+        "@storybook/react-webpack5",
+        "@storybook/vue3-vite",
+        "@storybook/vue3-webpack5",
+        "@storybook/angular",
+        "@storybook/html-vite",
+        "@storybook/svelte-vite",
+        "@storybook/sveltekit",
+        "@storybook/nextjs",
+        "@storybook/web-components-vite"
+      ],
+      "files": [
+        ".storybook/main.js",
+        ".storybook/main.ts",
+        ".storybook/main.mjs",
+        ".storybook/main.cjs",
+        ".storybook/main.mts"
+      ],
+      "scriptPatterns": ["\\bstorybook\\s+(dev|build)\\b", "\\bbuild-storybook\\b"]
+    },
+    "ladle": {
+      "packages": ["@ladle/react"],
+      "files": [".ladle/config.mjs", ".ladle/config.ts", ".ladle/config.js"],
+      "scriptPatterns": ["\\bladle\\b"]
+    },
+    "histoire": {
+      "packages": ["histoire", "@histoire/plugin-vue", "@histoire/plugin-react", "@histoire/plugin-svelte"],
+      "files": ["histoire.config.ts", "histoire.config.js", "histoire.config.mjs"],
+      "scriptPatterns": ["\\bhistoire\\b"]
+    },
+    "styleguidist": {
+      "packages": ["react-styleguidist", "vue-styleguidist"],
+      "files": ["styleguide.config.js", "styleguide.config.cjs", "styleguide.config.ts"],
+      "scriptPatterns": ["\\bstyleguidist\\b"]
+    },
+    "playroom": {
+      "packages": ["playroom"],
+      "scriptPatterns": ["\\bplayroom\\b"]
+    },
+    "docz": { "packages": ["docz", "@docz/core"] },
+    "pattern-lab": { "packages": ["@pattern-lab/core", "@pattern-lab/cli"] }
+  },
+  "formLibraries": {
+    "react-hook-form": { "packages": ["react-hook-form"] },
+    "formik": { "packages": ["formik"] },
+    "final-form": { "packages": ["final-form", "react-final-form", "vue-final-form"] },
+    "rjsf": {
+      "packages": [
+        "@rjsf/core",
+        "@rjsf/utils",
+        "@rjsf/mui",
+        "@rjsf/material-ui",
+        "@rjsf/chakra-ui",
+        "@rjsf/bootstrap",
+        "@rjsf/antd",
+        "@rjsf/validator-ajv8",
+        "@rjsf/validator-ajv6",
+        "react-jsonschema-form"
+      ]
+    },
+    "redux-form": { "packages": ["redux-form"] },
+    "formily": {
+      "packages": ["@formily/core", "@formily/react", "@formily/antd", "@formily/next", "@formily/vue"]
+    },
+    "tanstack-form": {
+      "packages": [
+        "@tanstack/react-form",
+        "@tanstack/vue-form",
+        "@tanstack/angular-form",
+        "@tanstack/svelte-form",
+        "@tanstack/solid-form"
+      ]
+    },
+    "informed": { "packages": ["informed"] },
+    "uniforms": {
+      "packages": [
+        "uniforms",
+        "uniforms-material",
+        "uniforms-semantic",
+        "uniforms-antd",
+        "uniforms-bootstrap4",
+        "uniforms-bootstrap5",
+        "uniforms-mui"
+      ]
+    },
+    "unform": { "packages": ["@unform/core", "@unform/web", "@unform/react", "@unform/mobile"] },
+    "houseform": { "packages": ["houseform"] },
+    "conform": { "packages": ["@conform-to/react", "@conform-to/remix", "@conform-to/dom"] },
+    "react-form": { "packages": ["react-form"] },
+    "formstate": { "packages": ["formstate", "formstate-react"] },
+    "mobx-react-form": { "packages": ["mobx-react-form"] },
+    "rc-field-form": { "packages": ["rc-field-form"] },
+    "jsonforms": {
+      "packages": [
+        "@jsonforms/core",
+        "@jsonforms/react",
+        "@jsonforms/vue",
+        "@jsonforms/angular",
+        "@jsonforms/material-renderers"
+      ]
+    },
+    "surveyjs": {
+      "packages": ["survey-core", "survey-react-ui", "survey-vue3-ui", "survey-creator-react"]
+    },
+    "ant-design-pro-form": { "packages": ["@ant-design/pro-form", "@ant-design/pro-components"] },
+    "mantine-form": { "packages": ["@mantine/form"] },
+    "felte": { "packages": ["felte", "@felte/react", "@felte/svelte", "@felte/solid"] },
+    "vee-validate": { "packages": ["vee-validate", "@vee-validate/rules", "@vee-validate/zod"] },
+    "vuelidate": { "packages": ["vuelidate", "@vuelidate/core", "@vuelidate/validators"] },
+    "vue-form-generator": { "packages": ["vue-form-generator"] },
+    "ngx-formly": {
+      "packages": ["@ngx-formly/core", "@ngx-formly/material", "@ngx-formly/bootstrap", "@ngx-formly/ionic"]
+    },
+    "svelte-forms-lib": { "packages": ["svelte-forms-lib"] },
+    "superforms": { "packages": ["sveltekit-superforms", "formsnap"] },
+    "react-form-builder2": { "packages": ["react-form-builder2"] },
+    "react-jsonschema-form-builder": { "packages": ["react-jsonschema-form-builder"] }
   }
 }

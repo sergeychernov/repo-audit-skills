@@ -1,0 +1,129 @@
+{
+    "doc": "Packages known to be deprecated, unmaintained, or replaced by a clearly better alternative. Each hit applies a penalty. 'replacement' is informational — the developer chooses how to migrate.",
+    "lastUpdated": "2026-05-27",
+    "packages": [
+        {
+            "name": "node-sass",
+            "reason": "Unmaintained since 2020; broken on Node 18+",
+            "replacement": "sass (dart-sass)"
+        },
+        {
+            "name": "request",
+            "reason": "Deprecated since 2020; use native fetch (Node 18+) or undici",
+            "replacement": "undici / native fetch"
+        },
+        {
+            "name": "grpc",
+            "reason": "Native binding dead since Node 16",
+            "replacement": "@grpc/grpc-js"
+        },
+        {
+            "name": "tslint",
+            "reason": "Deprecated in 2019 in favour of ESLint + typescript-eslint",
+            "replacement": "eslint + @typescript-eslint/*"
+        },
+        {
+            "name": "moment",
+            "reason": "In maintenance mode; large bundle; no tree-shaking",
+            "replacement": "date-fns / dayjs / luxon"
+        },
+        {
+            "name": "codeceptjs",
+            "reason": "Hard-pins puppeteer 13 / canvas 2; blocks Node 20+ bumps",
+            "replacement": "playwright"
+        },
+        {
+            "name": "@codeceptjs/mock-request",
+            "reason": "Pulls @pollyjs/adapter-puppeteer → puppeteer 13",
+            "replacement": "playwright route mocking"
+        },
+        {
+            "name": "@currys-co-uk/codeceptjs-resemblehelper",
+            "reason": "Pins canvas@2 transitively (no Node 22+ prebuilds)",
+            "replacement": "playwright toHaveScreenshot"
+        },
+        {
+            "name": "@pollyjs/adapter-puppeteer",
+            "reason": "Hard-pinned puppeteer 13",
+            "replacement": "playwright route mocking"
+        },
+        {
+            "name": "eslint-plugin-codeceptjs",
+            "reason": "Unmaintained since 2022; breaks on ESLint 9",
+            "replacement": "drop with codecept migration"
+        },
+        {
+            "name": "tsc-watch",
+            "reason": "Usually replaced by tsx or direct tsc --watch",
+            "replacement": "tsx / tsc --watch"
+        },
+        {
+            "name": "babel-eslint",
+            "reason": "Deprecated; replaced by @babel/eslint-parser",
+            "replacement": "@babel/eslint-parser"
+        },
+        {
+            "name": "babel-loader@7",
+            "reason": "Only matches old peer deps; project pinned to babel-loader 7.x with webpack 5+ usually means stuck dep tree",
+            "replacement": "babel-loader 9.x"
+        },
+        {
+            "name": "tslib@1",
+            "reason": "tslib 1.x predates TS 4 emit changes",
+            "replacement": "tslib 2.x"
+        },
+        {
+            "name": "puppeteer",
+            "minMajor": 22,
+            "reason": "puppeteer <22 segfaults on Node 22+",
+            "replacement": "puppeteer 22+ or playwright"
+        },
+        {
+            "name": "sharp",
+            "minMajor": 0,
+            "minMinor": 33,
+            "reason": "sharp <0.33 has no libvips prebuilds for Node 22+",
+            "replacement": "sharp 0.33+"
+        },
+        {
+            "name": "canvas",
+            "minMajor": 3,
+            "reason": "canvas@2.x has no prebuilt binaries for Node 22+",
+            "replacement": "canvas 3.x"
+        },
+        {
+            "name": "lerna",
+            "minMajor": 7,
+            "reason": "lerna <7 was unmaintained before Nx adoption",
+            "replacement": "lerna 8.x"
+        },
+        {
+            "name": "lint-staged",
+            "minMajor": 13,
+            "reason": "lint-staged <13 deprecated config schema",
+            "replacement": "lint-staged 15.x"
+        },
+        {
+            "name": "node-gyp",
+            "minMajor": 10,
+            "reason": "node-gyp <10 fails on Node 22+ V8 internals",
+            "replacement": "node-gyp 10.x"
+        },
+        {
+            "name": "core-js",
+            "minMajor": 3,
+            "reason": "core-js 2.x is unmaintained",
+            "replacement": "core-js 3.x"
+        },
+        {
+            "name": "fibers",
+            "reason": "Removed from Node 16+; was used by older sass setups",
+            "replacement": "drop (modern sass doesn't need it)"
+        },
+        {
+            "name": "left-pad",
+            "reason": "Iconic example; use String.prototype.padStart",
+            "replacement": "String.prototype.padStart"
+        }
+    ]
+}

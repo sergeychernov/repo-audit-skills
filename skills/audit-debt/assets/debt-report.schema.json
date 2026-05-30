@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sergeychernov/repo-audit-skills/skills/audit-debt/assets/debt-report.schema.json",
+  "title": "AuditDebtReport",
+  "description": "Tech-debt report written by audit-debt into .audit/reports/debt.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "profile", "score", "checksRun", "findings", "scoring"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "scoring": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["perMajorBehind", "perMinorBehind", "deprecated", "offline"],
+      "properties": {
+        "perMajorBehind": { "type": "number", "minimum": 0 },
+        "perMinorBehind": { "type": "number", "minimum": 0 },
+        "deprecated": { "type": "number", "minimum": 0 },
+        "offline": { "type": "boolean" }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "generatedAt", "repoName"],
+      "properties": {
+        "version": { "type": "integer" },
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "repoName": { "type": "string", "minLength": 1 }
+      }
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "grade", "label", "totalPenalty"],
+      "properties": {
+        "value": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "grade": { "type": "string", "pattern": "^[A-F]$" },
+        "label": { "type": "string", "minLength": 1 },
+        "totalPenalty": { "type": "number", "minimum": 0 }
+      }
+    },
+    "checksRun": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "checksSkipped": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "reason"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/recommendation" }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id", "checkId", "category", "criticality", "penalty", "message"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "checkId": { "type": "string", "minLength": 1 },
+        "category": { "type": "string", "minLength": 1 },
+        "criticality": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low", "info"]
+        },
+        "penalty": { "type": "number", "minimum": 0 },
+        "message": { "type": "string", "minLength": 1 },
+        "current": { "type": "string" },
+        "target": { "type": "string" },
+        "detail": {}
+      }
+    },
+    "recommendation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["findingId", "criticality", "rationale"],
+      "properties": {
+        "findingId": { "type": "string", "minLength": 1 },
+        "criticality": {
+          "type": "string",
+          "enum": ["critical", "high", "medium", "low", "info"]
+        },
+        "rationale": { "type": "string", "minLength": 1 },
+        "skill": { "type": ["string", "null"] },
+        "manualSteps": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

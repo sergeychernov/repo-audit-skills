@@ -1,0 +1,19 @@
+{
+  "doc": "Penalty multipliers per profile.stack segment (profile.schema.json). Base penalties: perMajorBehind and perMinorBehind apply before segment weight. Set weight to 0 to skip a segment entirely.",
+  "lastUpdated": "2026-05-30",
+  "penalties": {
+    "perMajorBehind": 3,
+    "perMinorBehind": 1,
+    "deprecated": 10
+  },
+  "segments": {
+    "frameworks": { "weight": 1.0, "label": "Frameworks" },
+    "bundlers": { "weight": 1.0, "label": "Bundlers" },
+    "testRunners": { "weight": 0.8, "label": "Test runners" },
+    "uiLibraries": { "weight": 0.6, "label": "UI libraries" },
+    "componentCatalogs": { "weight": 0.7, "label": "Component catalogs" },
+    "formLibraries": { "weight": 0.5, "label": "Form libraries" },
+    "linters": { "weight": 0.8, "label": "Linters" },
+    "databases": { "weight": 0.7, "label": "Databases" }
+  }
+}

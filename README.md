@@ -9,6 +9,7 @@ Compatible with [ide-agents](https://github.com/sergeychernov/ide-agents): neste
 | Skill | Description |
 |-------|-------------|
 | `audit-init` | Detects the project stack and writes `.audit/profile.json` |
+| `audit-debt` | Profile-driven tech-debt scan; writes `.audit/reports/debt.json` |
 
 ## Local testing
 

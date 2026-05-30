@@ -1,0 +1,68 @@
+{
+  "doc": "Maps finding ids to recommended migration skills. Prefix lookup: stack_behind:frameworks:react → stack_behind.",
+  "lastUpdated": "2026-05-30",
+  "findings": {
+    "cursor_rules_missing": {
+      "skill": "create-rule",
+      "rationale": "Add project-specific Cursor rules under .cursor/rules/"
+    },
+    "cursor_rules_criterion": {
+      "skill": "create-rule",
+      "rationale": "Fix formal quality issues in existing .mdc rules"
+    },
+    "node_eol": {
+      "skill": "bump-node-major",
+      "rationale": "Node major is past security support"
+    },
+    "node_outdated": {
+      "skill": "bump-node-major",
+      "rationale": "Bump Node one major at a time toward current LTS"
+    },
+    "yarn_classic": {
+      "skill": "bump-yarn",
+      "rationale": "Yarn 1 (Classic) is unmaintained; migrate to Berry"
+    },
+    "yarn_berry_pre_v4": {
+      "skill": "bump-yarn",
+      "rationale": "Yarn 2-3 are pre-stable Berry; align on Yarn 4"
+    },
+    "yarn_dedupe_opportunity": {
+      "skill": null,
+      "rationale": "Collapse duplicate resolutions in yarn.lock",
+      "manualSteps": [
+        "Run `yarn dedupe --strategy highest`",
+        "Run `yarn install`",
+        "Verify: `yarn dedupe --check` reports 0 packages"
+      ]
+    },
+    "stack_behind": {
+      "skill": null,
+      "rationale": "Bump the package toward npm latest — one major per PR when possible",
+      "manualSteps": [
+        "Check release notes on npm for breaking changes",
+        "Bump dependency in package.json / workspace",
+        "Run build, test, and lint before merge"
+      ]
+    },
+    "stack_deprecated_npm": {
+      "skill": null,
+      "rationale": "npm registry marks the installed version as deprecated — upgrade or replace",
+      "manualSteps": [
+        "Read the deprecation message on npm",
+        "Move to the suggested replacement or latest non-deprecated major"
+      ]
+    },
+    "stack_deprecated_list": {
+      "skill": "cleanup-unused-deps",
+      "rationale": "Known unmaintained or blocked package — remove or replace",
+      "manualSteps": [
+        "See finding detail.replacement",
+        "Run knip if the package is unused"
+      ]
+    },
+    "profile_stale": {
+      "skill": "audit-init",
+      "rationale": "Re-run stack detection so downstream audits use current profile"
+    }
+  }
+}

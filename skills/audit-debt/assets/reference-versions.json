@@ -1,0 +1,14 @@
+{
+  "doc": "Reference versions for runtime checks only (Node). Stack tools use npm registry in stack_tools check.",
+  "lastUpdated": "2026-05-30",
+  "runtimes": {
+    "node": {
+      "currentLts": 24,
+      "previousLts": 22,
+      "eolCutoff": 18
+    },
+    "yarn": {
+      "currentMajor": 4
+    }
+  }
+}

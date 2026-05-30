@@ -17,6 +17,7 @@ import { argv, exit } from 'node:process';
 const here = dirname(fileURLToPath(import.meta.url));
 const assetsDir = join(here, '..', 'assets');
 const markers = JSON.parse(readFileSync(join(assetsDir, 'stack-markers.json'), 'utf8'));
+const agentMarkers = JSON.parse(readFileSync(join(assetsDir, 'agent-config-markers.json'), 'utf8'));
 
 const flags = new Set(argv.slice(2).filter((a) => a.startsWith('--')).map((a) => a.slice(2)));
 const jsonOut = flags.has('json');
@@ -159,19 +160,6 @@ for (const file of pkgFiles) {
 
 const depNames = new Set(allDeps.map((d) => d.name));
 
-/** @type {Map<string, { range: string, file: string }>} */
-const depByName = new Map();
-for (const dep of allDeps) {
-    const existing = depByName.get(dep.name);
-    if (
-        !existing ||
-        dep.file === 'package.json' ||
-        dep.file.split('/').length < existing.file.split('/').length
-    ) {
-        depByName.set(dep.name, dep);
-    }
-}
-
 /** @param {string} range */
 function parseVersionFromRange(range) {
     if (/^(workspace:|link:|file:|catalog:|npm:|patch:|github:|git\+|https?:|\*$|latest$)/i.test(range)) {
@@ -188,14 +176,30 @@ function parseVersionFromRange(range) {
     return null;
 }
 
-/** @param {string[]} packages */
-function resolvePackageVersion(packages) {
-    for (const pkg of packages) {
-        const dep = depByName.get(pkg);
-        if (!dep) continue;
-        return parseVersionFromRange(dep.range);
+/** @param {string} a @param {string} b */
+function compareSemver(a, b) {
+    const pa = a.split(/[.-]/).map((part) => parseInt(part, 10) || 0);
+    const pb = b.split(/[.-]/).map((part) => parseInt(part, 10) || 0);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+        const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
+        if (diff !== 0) return diff;
     }
-    return null;
+    return a.localeCompare(b);
+}
+
+/** @param {string[]} packages @returns {(string | null)[]} */
+function resolveAllPackageVersions(packages) {
+    /** @type {Set<string | null>} */
+    const versions = new Set();
+    for (const dep of allDeps) {
+        if (packages.includes(dep.name)) {
+            versions.add(parseVersionFromRange(dep.range));
+        }
+    }
+    const parsed = [...versions].filter((v) => v !== null).sort(compareSemver);
+    if (parsed.length > 0) return parsed;
+    if (versions.has(null)) return [null];
+    return [];
 }
 
 /** @typedef {{ packages: string[], files?: string[], scriptPatterns?: string[] }} MarkerDef */
@@ -205,6 +209,41 @@ function hasTrackedFile(patterns) {
     return patterns.some((pattern) =>
         trackedFiles.some((file) => file === pattern || file.endsWith(`/${pattern}`) || basename(file) === pattern),
     );
+}
+
+/** @param {string} pattern */
+function isTrackedPath(pattern) {
+    return trackedFiles.some(
+        (file) => file === pattern || file.endsWith(`/${pattern}`) || basename(file) === pattern,
+    );
+}
+
+/**
+ * @param {Record<string, { files?: string[], prefixes?: Record<string, string> }>} definitions
+ * @returns {Record<string, { signals: string[] }>}
+ */
+function detectAgentTooling(definitions) {
+    /** @type {Record<string, { signals: string[] }>} */
+    const detected = {};
+
+    for (const [toolId, def] of Object.entries(definitions)) {
+        /** @type {Set<string>} */
+        const signals = new Set();
+
+        for (const file of def.files ?? []) {
+            if (isTrackedPath(file)) signals.add(file);
+        }
+
+        for (const [category, prefix] of Object.entries(def.prefixes ?? {})) {
+            if (trackedFiles.some((file) => file.startsWith(prefix))) signals.add(category);
+        }
+
+        if (signals.size > 0) {
+            detected[toolId] = { signals: [...signals].sort() };
+        }
+    }
+
+    return Object.fromEntries(Object.entries(detected).sort(([a], [b]) => a.localeCompare(b)));
 }
 
 /** @param {string[]} patterns */
@@ -217,10 +256,10 @@ function matchesPackageScripts(patterns) {
 
 /**
  * @param {Record<string, string[] | MarkerDef>} category
- * @returns {Record<string, string | null>}
+ * @returns {Record<string, (string | null)[]>}
  */
 function matchMarkersWithVersions(category) {
-    /** @type {Record<string, string | null>} */
+    /** @type {Record<string, (string | null)[]>} */
     const matched = {};
 
     for (const [label, def] of Object.entries(category)) {
@@ -230,24 +269,17 @@ function matchMarkersWithVersions(category) {
         const foundPackage = packages.find((pkg) => depNames.has(pkg));
 
         if (foundPackage) {
-            matched[label] = resolvePackageVersion(packages);
+            const versions = resolveAllPackageVersions(packages);
+            matched[label] = versions.length ? versions : [null];
         } else if (scriptPatterns?.length && matchesPackageScripts(scriptPatterns)) {
-            matched[label] = resolvePackageVersion(packages);
+            const versions = resolveAllPackageVersions(packages);
+            matched[label] = versions.length ? versions : [null];
         } else if (files?.length && hasTrackedFile(files)) {
-            matched[label] = null;
+            matched[label] = [null];
         }
     }
 
     return Object.fromEntries(Object.entries(matched).sort(([a], [b]) => a.localeCompare(b)));
-}
-
-/** @param {Record<string, string[]>} category */
-function matchMarkers(category) {
-    const matched = [];
-    for (const [label, packages] of Object.entries(category)) {
-        if (packages.some((p) => depNames.has(p))) matched.push(label);
-    }
-    return matched.sort();
 }
 
 // ------- package manager -------
@@ -327,8 +359,12 @@ const isMonorepo = monorepoSignals.length > 0 || pkgFiles.length > 1;
 const frameworks = matchMarkersWithVersions(markers.frameworks);
 const bundlers = matchMarkersWithVersions(markers.bundlers);
 const testRunners = matchMarkersWithVersions(markers.testRunners);
-const linters = matchMarkers(markers.linters);
-const databases = matchMarkers(markers.databases);
+const uiLibraries = matchMarkersWithVersions(markers.uiLibraries);
+const componentCatalogs = matchMarkersWithVersions(markers.componentCatalogs);
+const formLibraries = matchMarkersWithVersions(markers.formLibraries);
+const linters = matchMarkersWithVersions(markers.linters);
+const databases = matchMarkersWithVersions(markers.databases);
+const agentTooling = detectAgentTooling(agentMarkers);
 
 // Python markers from files
 if (
@@ -336,7 +372,7 @@ if (
     !('django' in frameworks) &&
     trackedFiles.some((f) => f.endsWith('manage.py'))
 ) {
-    frameworks.django = null;
+    frameworks.django = [null];
 }
 if (existsSync('go.mod')) {
     if (primaryLanguage === 'go' || languageCounts.go) {
@@ -352,7 +388,7 @@ function omitUndefined(obj) {
 }
 
 const profile = {
-    version: 2,
+    version: 4,
     generatedAt: new Date().toISOString(),
     repo: {
         name: basename(repoRoot),
@@ -374,9 +410,13 @@ const profile = {
         frameworks: Object.keys(frameworks).length ? frameworks : undefined,
         bundlers: Object.keys(bundlers).length ? bundlers : undefined,
         testRunners: Object.keys(testRunners).length ? testRunners : undefined,
-        linters: linters.length ? linters : undefined,
-        databases: databases.length ? databases : undefined,
+        uiLibraries: Object.keys(uiLibraries).length ? uiLibraries : undefined,
+        componentCatalogs: Object.keys(componentCatalogs).length ? componentCatalogs : undefined,
+        formLibraries: Object.keys(formLibraries).length ? formLibraries : undefined,
+        linters: Object.keys(linters).length ? linters : undefined,
+        databases: Object.keys(databases).length ? databases : undefined,
     }),
+    agentTooling: Object.keys(agentTooling).length ? agentTooling : undefined,
     audit: {
         scope: 'full',
         exclude: ['node_modules/', 'dist/', 'build/', '.git/'],
@@ -400,10 +440,15 @@ if (!dryRun) {
 
 // ------- output -------
 
-/** @param {Record<string, string | null>} items */
+/** @param {Record<string, (string | null)[]>} items */
 function formatStackItems(items) {
     return Object.entries(items)
-        .map(([name, version]) => (version ? `${name}@${version}` : name))
+        .map(([name, versions]) => {
+            const parsed = versions.filter((v) => v !== null);
+            if (parsed.length === 0) return name;
+            if (parsed.length === 1) return `${name}@${parsed[0]}`;
+            return `${name}@[${parsed.join(', ')}]`;
+        })
         .join(', ');
 }
 
@@ -423,8 +468,19 @@ if (jsonOut) {
     if (Object.keys(frameworks).length) console.log(`${c('Frameworks', '36')}:  ${formatStackItems(frameworks)}`);
     if (Object.keys(bundlers).length) console.log(`${c('Bundlers', '36')}:    ${formatStackItems(bundlers)}`);
     if (Object.keys(testRunners).length) console.log(`${c('Tests', '36')}:       ${formatStackItems(testRunners)}`);
-    if (linters.length) console.log(`${c('Linters', '36')}:     ${linters.join(', ')}`);
-    if (databases.length) console.log(`${c('Databases', '36')}:   ${databases.join(', ')}`);
+    if (Object.keys(uiLibraries).length) console.log(`${c('UI libs', '36')}:     ${formatStackItems(uiLibraries)}`);
+    if (Object.keys(componentCatalogs).length)
+        console.log(`${c('Catalogs', '36')}:   ${formatStackItems(componentCatalogs)}`);
+    if (Object.keys(formLibraries).length)
+        console.log(`${c('Forms', '36')}:      ${formatStackItems(formLibraries)}`);
+    if (Object.keys(linters).length) console.log(`${c('Linters', '36')}:     ${formatStackItems(linters)}`);
+    if (Object.keys(databases).length) console.log(`${c('Databases', '36')}:   ${formatStackItems(databases)}`);
+    if (Object.keys(agentTooling).length) {
+        const agentSummary = Object.entries(agentTooling)
+            .map(([tool, { signals }]) => `${tool}(${signals.join(', ')})`)
+            .join(', ');
+        console.log(`${c('Agent tooling', '36')}: ${agentSummary}`);
+    }
     if (sortedLanguages.length > 1) {
         console.log('');
         console.log(c('All languages:', '90'));

@@ -1,0 +1,49 @@
+{
+  "doc": "Formal criteria for .cursor/rules/*.mdc. Each failed criterion emits one finding (penalty 1). Skipped when no .mdc files exist (missing rules uses missingRulesPenalty).",
+  "lastUpdated": "2026-05-30",
+  "missingRulesPenalty": 10,
+  "maxLinesPerRule": 150,
+  "minBodyLines": 5,
+  "criteria": [
+    {
+      "id": "frontmatter",
+      "label": "Valid YAML frontmatter",
+      "message": "Every .mdc rule must start with YAML frontmatter between --- delimiters."
+    },
+    {
+      "id": "description",
+      "label": "Non-empty description",
+      "message": "Every rule must declare a non-empty description field in frontmatter."
+    },
+    {
+      "id": "scope",
+      "label": "Scope declared",
+      "message": "Every rule must set alwaysApply: true or a non-empty globs pattern."
+    },
+    {
+      "id": "body_min",
+      "label": "Minimum body content",
+      "message": "Rule body must contain at least 5 non-empty lines after frontmatter."
+    },
+    {
+      "id": "overview",
+      "label": "Repository overview rule",
+      "message": "At least one rule must have alwaysApply: true or globs covering **/*."
+    },
+    {
+      "id": "length_cap",
+      "label": "Rule length cap",
+      "message": "No single rule file may exceed 150 lines (create-rule recommends under 50)."
+    },
+    {
+      "id": "mdc_only",
+      "label": "mdc-only directory",
+      "message": ".cursor/rules/ must contain only .mdc rule files (no .md, .txt, etc.)."
+    },
+    {
+      "id": "unique_desc",
+      "label": "Unique descriptions",
+      "message": "Each rule description must be unique across all rules."
+    }
+  ]
+}

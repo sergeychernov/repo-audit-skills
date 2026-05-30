@@ -1,0 +1,41 @@
+{
+  "doc": "Profile-driven checks for audit-debt. Each entry runs only when its 'when' clause matches .audit/profile.json. Extend with new checks under scripts/checks/ and register here.",
+  "version": 1,
+  "checks": [
+    {
+      "id": "cursor_rules",
+      "category": "agent-tooling",
+      "label": "Cursor rules quality",
+      "when": {
+        "or": [
+          { "agentSignal": { "agent": "cursor", "signal": "rules" } },
+          { "gitTrackedPrefix": ".cursor/rules/" }
+        ]
+      }
+    },
+    {
+      "id": "node_runtime",
+      "category": "runtime",
+      "label": "Node.js runtime version",
+      "when": { "has": "stack.runtime.node" }
+    },
+    {
+      "id": "stack_tools",
+      "category": "tooling",
+      "label": "Stack versions vs npm latest + deprecated",
+      "when": { "hasStackToolItems": true }
+    },
+    {
+      "id": "yarn_package_manager",
+      "category": "package-manager",
+      "label": "Yarn version and lockfile dedupe",
+      "when": { "packageManager": "yarn" }
+    },
+    {
+      "id": "profile_freshness",
+      "category": "audit",
+      "label": "Audit profile age",
+      "when": { "always": true }
+    }
+  ]
+}

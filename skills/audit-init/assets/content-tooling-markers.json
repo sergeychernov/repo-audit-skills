@@ -1,0 +1,27 @@
+{
+  "obsidian": {
+    "files": [".obsidian/core-plugins.json", ".obsidian/app.json"],
+    "prefixes": {
+      "vault": ".obsidian/"
+    }
+  },
+  "docusaurus": {
+    "packages": ["@docusaurus/core", "@docusaurus/preset-classic"],
+    "files": [
+      "docusaurus.config.js",
+      "docusaurus.config.ts",
+      "docusaurus.config.mjs"
+    ]
+  },
+  "json-schema-frontmatter": {
+    "prefixes": {
+      "schemas": ".cursor/schemas/"
+    }
+  },
+  "gray-matter": {
+    "packages": ["gray-matter"]
+  },
+  "vercel": {
+    "files": ["vercel.json"]
+  }
+}

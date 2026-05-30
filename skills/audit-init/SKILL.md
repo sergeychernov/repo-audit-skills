@@ -28,6 +28,7 @@ Scripts and data live **inside this skill's folder**, not in the target repo.
 └── assets/
     ├── stack-markers.json
     ├── agent-config-markers.json
+    ├── content-tooling-markers.json
     └── profile.schema.json
 ```
 
@@ -86,7 +87,10 @@ Open `.audit/profile.json`. Key fields:
 | Field | Meaning |
 |-------|---------|
 | `generatedBy` | Git URL of the repo-audit-skills catalog |
-| `repo.primaryLanguage` | Dominant language by tracked source files |
+| `repo.primaryLanguage` | Dominant language by tracked source files (includes `markdown` / `mdx`) |
+| `repo.contentRepo` | `true` when `content.archetype` is not `code` |
+| `content.archetype` | `code` \| `articles` \| `novel` \| `docs-site` \| `mixed` |
+| `content.tooling` | Obsidian, Docusaurus, `.cursor/schemas/`, … — same `signals` shape as `agentTooling` |
 | `repo.monorepo` | Workspaces / lerna / nx / turbo / multiple package.json |
 | `stack.runtime.node` | From `.nvmrc`, `.node-version`, or `engines.node` |
 | `stack.packageManager` | yarn / npm / pnpm / bun + version when detectable |
@@ -100,7 +104,9 @@ Open `.audit/profile.json`. Key fields:
 | `stack.databases` | Postgres, MySQL, MongoDB, Redis, … → semver[] |
 | `agentTooling` | Cursor, Claude, Codex, Copilot, … — matched config paths and rule/skill directory categories |
 
-Profile `version: 4` — stack items are objects `{ "react": ["18.2.0", "17.0.2"] }`: unique versions from **all** `package.json` in the repo (monorepo-safe). Single version → one-element array. `[null]` means detected but version unknown (file marker only, `workspace:*` range).
+Profile `version: 5` — stack items are objects `{ "react": ["18.2.0", "17.0.2"] }`: unique versions from **all** `package.json` in the repo (monorepo-safe). Single version → one-element array. `[null]` means detected but version unknown (file marker only, `workspace:*` range).
+
+`content.archetype` heuristics: `novel` (numbered `00_…` sections, `Act_*` / scene files), `articles` (Obsidian vault or article folders with `index.md`, no root `package.json`), `docs-site` (Docusaurus + markdown), `mixed` (markdown + code languages), `code` (default).
 
 `agentTooling` entries look like `{ "cursor": { "signals": ["rules", "skills", "AGENTS.md"] } }`: exact file paths from markers plus category labels when tracked files exist under a prefix (e.g. `rules` → `.cursor/rules/`).
 
@@ -122,7 +128,8 @@ Keep `profile.json` committed when the team shares audit context.
 
 | Dimension | Source |
 |-----------|--------|
-| Languages | `git ls-files` extension counts (typescript, python, go, …) |
+| Languages | `git ls-files` extension counts (typescript, python, markdown, mdx, …) |
+| Content archetype / tooling | Heuristics + `assets/content-tooling-markers.json` |
 | Node version | `.nvmrc`, `.node-version`, root `engines.node` |
 | Package manager | lockfiles + `packageManager` field |
 | Monorepo | workspaces, lerna, nx, turbo, pnpm-workspace, go.work |
@@ -144,3 +151,5 @@ If detection misses a framework, extend `assets/stack-markers.json` in this skil
 and re-install the skill — do not patch markers in the target project.
 
 If an AI assistant config is missing, extend `assets/agent-config-markers.json` the same way.
+
+If a document tool is missing (Obsidian, Quarto, …), extend `assets/content-tooling-markers.json`.

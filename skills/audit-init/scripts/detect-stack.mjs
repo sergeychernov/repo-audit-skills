@@ -20,6 +20,9 @@ const here = dirname(fileURLToPath(import.meta.url));
 const assetsDir = join(here, '..', 'assets');
 const markers = JSON.parse(readFileSync(join(assetsDir, 'stack-markers.json'), 'utf8'));
 const agentMarkers = JSON.parse(readFileSync(join(assetsDir, 'agent-config-markers.json'), 'utf8'));
+const contentToolingMarkers = JSON.parse(
+    readFileSync(join(assetsDir, 'content-tooling-markers.json'), 'utf8'),
+);
 
 const flags = new Set(argv.slice(2).filter((a) => a.startsWith('--')).map((a) => a.slice(2)));
 const jsonOut = flags.has('json');
@@ -58,6 +61,8 @@ const LANG_BY_EXT = {
     '.sh': 'shell',
     '.bash': 'shell',
     '.zsh': 'shell',
+    '.md': 'markdown',
+    '.mdx': 'mdx',
 };
 
 const CONFIG_EXTS = new Set([
@@ -65,8 +70,6 @@ const CONFIG_EXTS = new Set([
     '.yaml',
     '.yml',
     '.toml',
-    '.md',
-    '.mdx',
     '.txt',
     '.xml',
     '.svg',
@@ -103,8 +106,9 @@ process.chdir(repoRoot);
 
 // ------- git ls-files -------
 
-const trackedFiles = execSync('git ls-files', { encoding: 'utf8' })
-    .split('\n')
+const trackedFiles = execSync('git ls-files -z')
+    .toString('utf8')
+    .split('\0')
     .filter(Boolean);
 
 // ------- languages -------
@@ -221,10 +225,14 @@ function isTrackedPath(pattern) {
 }
 
 /**
- * @param {Record<string, { files?: string[], prefixes?: Record<string, string> }>} definitions
+ * @typedef {{ files?: string[], prefixes?: Record<string, string>, packages?: string[] }} SignalMarkerDef
+ */
+
+/**
+ * @param {Record<string, SignalMarkerDef>} definitions
  * @returns {Record<string, { signals: string[] }>}
  */
-function detectAgentTooling(definitions) {
+function detectSignalTooling(definitions) {
     /** @type {Record<string, { signals: string[] }>} */
     const detected = {};
 
@@ -240,12 +248,21 @@ function detectAgentTooling(definitions) {
             if (trackedFiles.some((file) => file.startsWith(prefix))) signals.add(category);
         }
 
+        for (const pkg of def.packages ?? []) {
+            if (depNames.has(pkg)) signals.add(pkg);
+        }
+
         if (signals.size > 0) {
             detected[toolId] = { signals: [...signals].sort() };
         }
     }
 
     return Object.fromEntries(Object.entries(detected).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+/** @param {Record<string, SignalMarkerDef>} definitions */
+function detectAgentTooling(definitions) {
+    return detectSignalTooling(definitions);
 }
 
 /** @param {string[]} patterns */
@@ -367,6 +384,93 @@ const formLibraries = matchMarkersWithVersions(markers.formLibraries);
 const linters = matchMarkersWithVersions(markers.linters);
 const databases = matchMarkersWithVersions(markers.databases);
 const agentTooling = detectAgentTooling(agentMarkers);
+const contentTooling = detectSignalTooling(contentToolingMarkers);
+
+// ------- content archetype -------
+
+const CODE_LANGUAGE_IDS = [
+    'typescript',
+    'javascript',
+    'python',
+    'go',
+    'rust',
+    'java',
+    'kotlin',
+    'ruby',
+    'php',
+    'csharp',
+    'swift',
+    'vue',
+    'scala',
+    'elixir',
+    'erlang',
+    'haskell',
+    'lua',
+    'zig',
+    'dart',
+    'shell',
+];
+
+/** @returns {string[]} */
+function detectArticleSlugs() {
+    /** @type {Set<string>} */
+    const slugs = new Set();
+    for (const file of trackedFiles) {
+        const match = file.match(/^([^/.][^/]*)\/index\.md$/);
+        if (match) slugs.add(match[1]);
+    }
+    return [...slugs].sort();
+}
+
+function hasObsidianVault() {
+    return trackedFiles.some((file) => file.startsWith('.obsidian/'));
+}
+
+function hasNovelStructure() {
+    const numberedRoot = trackedFiles.some((file) => {
+        const top = file.split('/')[0];
+        return /^[0-9]{2}_/.test(top);
+    });
+    const actsOrChapters = trackedFiles.some(
+        (file) => file.includes('/Act_') || /^04_Главы\//.test(file),
+    );
+    const scenes = trackedFiles.some(
+        (file) => /_сцена\.md$/i.test(file) || /\/мета\.md$/i.test(file),
+    );
+    return numberedRoot && (actsOrChapters || scenes);
+}
+
+function hasDocusaurusSite() {
+    return (
+        depNames.has('@docusaurus/core') ||
+        hasTrackedFile([
+            'docusaurus.config.js',
+            'docusaurus.config.ts',
+            'docusaurus.config.mjs',
+        ])
+    );
+}
+
+/** @returns {'code' | 'articles' | 'novel' | 'docs-site' | 'mixed'} */
+function detectContentArchetype() {
+    const mdCount = (languageCounts.markdown || 0) + (languageCounts.mdx || 0);
+    const codeCount = CODE_LANGUAGE_IDS.reduce((sum, lang) => sum + (languageCounts[lang] || 0), 0);
+    const articleSlugs = detectArticleSlugs();
+    const obsidian = hasObsidianVault();
+    const novel = hasNovelStructure();
+    const docusaurus = hasDocusaurusSite();
+
+    if (novel) return 'novel';
+    if (obsidian || (articleSlugs.length > 0 && pkgFiles.length === 0)) return 'articles';
+    if (articleSlugs.length > 0 && mdCount >= codeCount) return 'articles';
+    if (docusaurus && mdCount > 0) return 'docs-site';
+    if (mdCount > 0 && codeCount > 0) return 'mixed';
+    if (mdCount > 0) return 'articles';
+    return 'code';
+}
+
+const contentArchetype = detectContentArchetype();
+const contentRepo = contentArchetype !== 'code';
 
 // Python markers from files
 if (
@@ -390,18 +494,23 @@ function omitUndefined(obj) {
 }
 
 const profile = {
-    version: 4,
+    version: 5,
     generatedAt: new Date().toISOString(),
     generatedBy: GENERATED_BY,
     repo: {
         name: basename(repoRoot),
         root: repoRoot,
         primaryLanguage,
+        contentRepo,
         monorepo: isMonorepo,
         monorepoSignals: monorepoSignals.length ? monorepoSignals : undefined,
         packageJsonCount: pkgFiles.length,
     },
     languages: Object.fromEntries(sortedLanguages),
+    content: omitUndefined({
+        archetype: contentArchetype,
+        tooling: Object.keys(contentTooling).length ? contentTooling : undefined,
+    }),
     stack: omitUndefined({
         runtime: nodeVersion ? { node: nodeVersion } : {},
         packageManager: packageManager.name
@@ -463,6 +572,16 @@ if (jsonOut) {
     console.log('');
     console.log(`${c('Repo', '36')}:        ${profile.repo.name}`);
     console.log(`${c('Language', '36')}:    ${profile.repo.primaryLanguage}${sortedLanguages[0] ? ` (${sortedLanguages[0][1]} files)` : ''}`);
+    console.log(`${c('Content repo', '36')}: ${profile.repo.contentRepo ? 'yes' : 'no'}`);
+    if (profile.content?.archetype) {
+        console.log(`${c('Archetype', '36')}:   ${profile.content.archetype}`);
+    }
+    if (profile.content?.tooling && Object.keys(profile.content.tooling).length) {
+        const contentSummary = Object.entries(profile.content.tooling)
+            .map(([tool, { signals }]) => `${tool}(${signals.join(', ')})`)
+            .join(', ');
+        console.log(`${c('Content tooling', '36')}: ${contentSummary}`);
+    }
     console.log(`${c('Monorepo', '36')}:    ${profile.repo.monorepo ? 'yes' : 'no'}${monorepoSignals.length ? ` (${monorepoSignals.join(', ')})` : ''}`);
     if (nodeVersion) console.log(`${c('Node', '36')}:        ${nodeVersion}`);
     if (packageManager.name) {

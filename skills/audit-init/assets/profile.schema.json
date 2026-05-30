@@ -31,10 +31,15 @@
           "uniqueItems": true
         }
       }
+    },
+    "contentArchetype": {
+      "type": "string",
+      "enum": ["code", "articles", "novel", "docs-site", "mixed"],
+      "description": "Repository content model for document automation"
     }
   },
   "additionalProperties": false,
-  "required": ["version", "generatedAt", "generatedBy", "repo", "languages", "stack", "audit"],
+  "required": ["version", "generatedAt", "generatedBy", "repo", "languages", "content", "stack", "audit"],
   "properties": {
     "version": {
       "type": "integer",
@@ -54,7 +59,7 @@
     "repo": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["name", "root", "primaryLanguage", "monorepo", "packageJsonCount"],
+      "required": ["name", "root", "primaryLanguage", "contentRepo", "monorepo", "packageJsonCount"],
       "properties": {
         "name": {
           "type": "string",
@@ -69,7 +74,11 @@
         "primaryLanguage": {
           "type": "string",
           "minLength": 1,
-          "description": "Dominant language by tracked source file count"
+          "description": "Dominant language by tracked source file count (includes markdown/mdx)"
+        },
+        "contentRepo": {
+          "type": "boolean",
+          "description": "True when content.archetype is not code (document-oriented repository)"
         },
         "monorepo": {
           "type": "boolean"
@@ -91,6 +100,19 @@
       "additionalProperties": {
         "type": "integer",
         "minimum": 1
+      }
+    },
+    "content": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["archetype"],
+      "properties": {
+        "archetype": { "$ref": "#/$defs/contentArchetype" },
+        "tooling": {
+          "type": "object",
+          "description": "Authoring and publishing tools (Obsidian, Docusaurus, frontmatter schemas, …)",
+          "additionalProperties": { "$ref": "#/$defs/agentToolEntry" }
+        }
       }
     },
     "stack": {

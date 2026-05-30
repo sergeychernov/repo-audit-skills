@@ -52,6 +52,7 @@
       "uniqueItems": true
     },
     "checksSkipped": {
+      "description": "Present only when run-audit.mjs is invoked with --verbose (debug). Omitted from default reports so agents do not treat profile-conditional skips as user-facing debt.",
       "type": "array",
       "items": {
         "type": "object",

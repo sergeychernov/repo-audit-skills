@@ -10,6 +10,7 @@
 //   node <SKILL_DIR>/scripts/run-audit.mjs --dry-run
 //   node <SKILL_DIR>/scripts/run-audit.mjs --explain
 //   node <SKILL_DIR>/scripts/run-audit.mjs --offline   # skip npm (deprecated list only)
+//   node <SKILL_DIR>/scripts/run-audit.mjs --verbose  # include checksSkipped in report (debug)
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -31,6 +32,7 @@ const jsonOut = flags.has('json');
 const dryRun = flags.has('dry-run');
 const explain = flags.has('explain');
 const offline = flags.has('offline');
+const verbose = flags.has('verbose');
 
 const checkRegistry = JSON.parse(readFileSync(join(assetsDir, 'check-registry.json'), 'utf8'));
 const skillRegistry = JSON.parse(readFileSync(join(assetsDir, 'skill-registry.json'), 'utf8'));
@@ -143,10 +145,13 @@ async function main() {
             totalPenalty: scoreResult.totalPenalty,
         },
         checksRun,
-        checksSkipped: checksSkipped.length ? checksSkipped : undefined,
         findings,
         recommendations,
     };
+
+    if (verbose && checksSkipped.length) {
+        report.checksSkipped = checksSkipped;
+    }
 
     const reportPath = join(repoRoot, '.audit/reports/debt.json');
 
@@ -224,12 +229,6 @@ function printHumanReport(report, profPath, outPath) {
     console.log(c(`  total penalty: -${report.score.totalPenalty}`, DIM));
 
     console.log(`\n${c('Checks run:', BLD)} ${report.checksRun.join(', ') || '(none)'}`);
-    if (report.checksSkipped?.length) {
-        console.log(c('Checks skipped:', DIM));
-        for (const s of report.checksSkipped) {
-            console.log(c(`  • ${s.id}: ${s.reason}`, DIM));
-        }
-    }
 
     console.log(`\n${c('━━━ Findings ━━━', BLD)}`);
     if (!report.findings.length) {
@@ -278,7 +277,13 @@ function printHumanReport(report, profPath, outPath) {
     if (report.scoring?.offline) {
         console.log(c('\nOffline mode: npm version checks skipped.', YEL));
     }
-    console.log(c('\nRe-run with --json, --dry-run, --offline, or --explain.', DIM));
+    if (verbose && report.checksSkipped?.length) {
+        console.log(c('\n(debug) Checks not run for this profile:', DIM));
+        for (const s of report.checksSkipped) {
+            console.log(c(`  • ${s.id}: ${s.reason}`, DIM));
+        }
+    }
+    console.log(c('\nRe-run with --json, --dry-run, --offline, --explain, or --verbose.', DIM));
 }
 
 function printExplain(scoreResult) {

@@ -51,6 +51,7 @@ node <SKILL_DIR>/scripts/run-audit.mjs
 | `--dry-run` | Scan without writing `.audit/reports/` |
 | `--offline` | No npm calls — `stack_tools` uses bundled deprecated list only |
 | `--explain` | Scoring breakdown table |
+| `--verbose` | Include `checksSkipped` in report (debug only; not for user summaries) |
 
 Exit code `2` when score &lt; 40.
 
@@ -109,6 +110,7 @@ Finding ids: `stack_behind:…`, `stack_deprecated_npm:…`, `stack_deprecated_l
 
 1. Ensure `.audit/profile.json` exists (`audit-init`).
 2. Run `run-audit.mjs` (needs network for full stack scan).
-3. Summarise score, `checksRun`, top findings.
-4. Point to `.audit/reports/debt.json`.
-5. Only write under `.audit/reports/` in the target repo.
+3. Summarise **score**, **`checksRun`**, top **findings**, and **recommendations** only.
+4. **Do not** list checks that did not run (e.g. `yarn_package_manager` when `packageManager` is not `yarn`). Conditional skips are expected, not action items — never suggest switching package managers because a Yarn-only check was skipped.
+5. Point to `.audit/reports/debt.json`.
+6. Only write under `.audit/reports/` in the target repo.

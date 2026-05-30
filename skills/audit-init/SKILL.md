@@ -6,7 +6,7 @@ description: >-
   downstream audit skills. Use when initializing a repo audit, detecting tech
   stack, creating `.audit/`, or before running architecture/security/code-smell
   audits.
-scope: project
+scope: any
 ---
 
 # Audit init — stack detection
@@ -86,7 +86,11 @@ Open `.audit/profile.json`. Key fields:
 | `repo.monorepo` | Workspaces / lerna / nx / turbo / multiple package.json |
 | `stack.runtime.node` | From `.nvmrc`, `.node-version`, or `engines.node` |
 | `stack.packageManager` | yarn / npm / pnpm / bun + version when detectable |
-| `stack.frameworks` | Matched from package.json deps |
+| `stack.frameworks` | Matched from package.json deps + config files; id → semver |
+| `stack.bundlers` | id → semver from package.json |
+| `stack.testRunners` | id → semver from package.json |
+
+Profile `version: 2` — frameworks, bundlers and testRunners are objects `{ "nextjs": "14.2.5" }`, not string arrays. `null` means detected but version unknown (e.g. file marker only, `workspace:*` range).
 | `audit.exclude` | Paths skipped by downstream audit skills |
 
 Validate shape against `<SKILL_DIR>/assets/profile.schema.json` when needed.
@@ -109,7 +113,7 @@ Keep `profile.json` committed when the team shares audit context.
 | Node version | `.nvmrc`, `.node-version`, root `engines.node` |
 | Package manager | lockfiles + `packageManager` field |
 | Monorepo | workspaces, lerna, nx, turbo, pnpm-workspace, go.work |
-| Frameworks / bundlers / tests | `assets/stack-markers.json` matched against deps |
+| Frameworks / bundlers / tests | `assets/stack-markers.json` — deps, tracked config files (e.g. `next.config.ts`), and `package.json` script commands (e.g. `next dev`); versions from semver ranges |
 
 Read-only. No network. No `node_modules` access. Requires a git repo.
 

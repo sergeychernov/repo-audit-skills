@@ -129,6 +129,9 @@ const pkgFiles = trackedFiles.filter((f) => f.endsWith('package.json') && !f.inc
 /** @type {Record<string, string>[]} */
 const allDeps = [];
 
+/** @type {string[]} */
+const allScriptValues = [];
+
 /** @type {Record<string, unknown> | null} */
 let rootPkg = null;
 
@@ -140,6 +143,12 @@ for (const file of pkgFiles) {
         continue;
     }
     if (file === 'package.json') rootPkg = pkg;
+    const scripts = pkg.scripts;
+    if (scripts && typeof scripts === 'object') {
+        for (const value of Object.values(scripts)) {
+            if (typeof value === 'string') allScriptValues.push(value);
+        }
+    }
     for (const key of ['dependencies', 'devDependencies', 'peerDependencies', 'optionalDependencies']) {
         const block = pkg[key] || {};
         for (const [name, range] of Object.entries(block)) {
@@ -149,6 +158,97 @@ for (const file of pkgFiles) {
 }
 
 const depNames = new Set(allDeps.map((d) => d.name));
+
+/** @type {Map<string, { range: string, file: string }>} */
+const depByName = new Map();
+for (const dep of allDeps) {
+    const existing = depByName.get(dep.name);
+    if (
+        !existing ||
+        dep.file === 'package.json' ||
+        dep.file.split('/').length < existing.file.split('/').length
+    ) {
+        depByName.set(dep.name, dep);
+    }
+}
+
+/** @param {string} range */
+function parseVersionFromRange(range) {
+    if (/^(workspace:|link:|file:|catalog:|npm:|patch:|github:|git\+|https?:|\*$|latest$)/i.test(range)) {
+        return null;
+    }
+    const exact = range.match(/^v?(\d+\.\d+\.\d+(?:-[\w.]+)?)/);
+    if (exact) return exact[1];
+    const partial = range.match(/(\d+\.\d+\.\d+(?:-[\w.]+)?)/);
+    if (partial) return partial[1];
+    const minor = range.match(/(\d+\.\d+)/);
+    if (minor) return minor[1];
+    const major = range.match(/(\d+)/);
+    if (major) return major[1];
+    return null;
+}
+
+/** @param {string[]} packages */
+function resolvePackageVersion(packages) {
+    for (const pkg of packages) {
+        const dep = depByName.get(pkg);
+        if (!dep) continue;
+        return parseVersionFromRange(dep.range);
+    }
+    return null;
+}
+
+/** @typedef {{ packages: string[], files?: string[], scriptPatterns?: string[] }} MarkerDef */
+
+/** @param {string[]} patterns */
+function hasTrackedFile(patterns) {
+    return patterns.some((pattern) =>
+        trackedFiles.some((file) => file === pattern || file.endsWith(`/${pattern}`) || basename(file) === pattern),
+    );
+}
+
+/** @param {string[]} patterns */
+function matchesPackageScripts(patterns) {
+    return patterns.some((pattern) => {
+        const re = new RegExp(pattern);
+        return allScriptValues.some((script) => re.test(script));
+    });
+}
+
+/**
+ * @param {Record<string, string[] | MarkerDef>} category
+ * @returns {Record<string, string | null>}
+ */
+function matchMarkersWithVersions(category) {
+    /** @type {Record<string, string | null>} */
+    const matched = {};
+
+    for (const [label, def] of Object.entries(category)) {
+        const packages = Array.isArray(def) ? def : def.packages;
+        const files = Array.isArray(def) ? undefined : def.files;
+        const scriptPatterns = Array.isArray(def) ? undefined : def.scriptPatterns;
+        const foundPackage = packages.find((pkg) => depNames.has(pkg));
+
+        if (foundPackage) {
+            matched[label] = resolvePackageVersion(packages);
+        } else if (scriptPatterns?.length && matchesPackageScripts(scriptPatterns)) {
+            matched[label] = resolvePackageVersion(packages);
+        } else if (files?.length && hasTrackedFile(files)) {
+            matched[label] = null;
+        }
+    }
+
+    return Object.fromEntries(Object.entries(matched).sort(([a], [b]) => a.localeCompare(b)));
+}
+
+/** @param {Record<string, string[]>} category */
+function matchMarkers(category) {
+    const matched = [];
+    for (const [label, packages] of Object.entries(category)) {
+        if (packages.some((p) => depNames.has(p))) matched.push(label);
+    }
+    return matched.sort();
+}
 
 // ------- package manager -------
 
@@ -224,26 +324,19 @@ const isMonorepo = monorepoSignals.length > 0 || pkgFiles.length > 1;
 
 // ------- marker matching -------
 
-/** @param {Record<string, string[]>} category */
-function matchMarkers(category) {
-    const matched = [];
-    for (const [label, packages] of Object.entries(category)) {
-        if (packages.some((p) => depNames.has(p))) matched.push(label);
-    }
-    return matched.sort();
-}
-
-const frameworks = matchMarkers(markers.frameworks);
-const bundlers = matchMarkers(markers.bundlers);
-const testRunners = matchMarkers(markers.testRunners);
+const frameworks = matchMarkersWithVersions(markers.frameworks);
+const bundlers = matchMarkersWithVersions(markers.bundlers);
+const testRunners = matchMarkersWithVersions(markers.testRunners);
 const linters = matchMarkers(markers.linters);
 const databases = matchMarkers(markers.databases);
 
-// Python / Go markers from files
-if (existsSync('requirements.txt') || existsSync('pyproject.toml') || existsSync('Pipfile')) {
-    if (!frameworks.includes('django') && trackedFiles.some((f) => f.endsWith('manage.py'))) {
-        frameworks.push('django');
-    }
+// Python markers from files
+if (
+    (existsSync('requirements.txt') || existsSync('pyproject.toml') || existsSync('Pipfile')) &&
+    !('django' in frameworks) &&
+    trackedFiles.some((f) => f.endsWith('manage.py'))
+) {
+    frameworks.django = null;
 }
 if (existsSync('go.mod')) {
     if (primaryLanguage === 'go' || languageCounts.go) {
@@ -259,7 +352,7 @@ function omitUndefined(obj) {
 }
 
 const profile = {
-    version: 1,
+    version: 2,
     generatedAt: new Date().toISOString(),
     repo: {
         name: basename(repoRoot),
@@ -278,9 +371,9 @@ const profile = {
                   version: packageManager.version ?? undefined,
               })
             : undefined,
-        frameworks: frameworks.length ? frameworks : undefined,
-        bundlers: bundlers.length ? bundlers : undefined,
-        testRunners: testRunners.length ? testRunners : undefined,
+        frameworks: Object.keys(frameworks).length ? frameworks : undefined,
+        bundlers: Object.keys(bundlers).length ? bundlers : undefined,
+        testRunners: Object.keys(testRunners).length ? testRunners : undefined,
         linters: linters.length ? linters : undefined,
         databases: databases.length ? databases : undefined,
     }),
@@ -307,6 +400,13 @@ if (!dryRun) {
 
 // ------- output -------
 
+/** @param {Record<string, string | null>} items */
+function formatStackItems(items) {
+    return Object.entries(items)
+        .map(([name, version]) => (version ? `${name}@${version}` : name))
+        .join(', ');
+}
+
 if (jsonOut) {
     console.log(JSON.stringify({ profile, profilePath: dryRun ? null : profilePath }, null, 2));
 } else {
@@ -320,9 +420,9 @@ if (jsonOut) {
     if (packageManager.name) {
         console.log(`${c('Package mgr', '36')}: ${packageManager.name}${packageManager.version ? `@${packageManager.version}` : ''}`);
     }
-    if (frameworks.length) console.log(`${c('Frameworks', '36')}:  ${frameworks.join(', ')}`);
-    if (bundlers.length) console.log(`${c('Bundlers', '36')}:    ${bundlers.join(', ')}`);
-    if (testRunners.length) console.log(`${c('Tests', '36')}:       ${testRunners.join(', ')}`);
+    if (Object.keys(frameworks).length) console.log(`${c('Frameworks', '36')}:  ${formatStackItems(frameworks)}`);
+    if (Object.keys(bundlers).length) console.log(`${c('Bundlers', '36')}:    ${formatStackItems(bundlers)}`);
+    if (Object.keys(testRunners).length) console.log(`${c('Tests', '36')}:       ${formatStackItems(testRunners)}`);
     if (linters.length) console.log(`${c('Linters', '36')}:     ${linters.join(', ')}`);
     if (databases.length) console.log(`${c('Databases', '36')}:   ${databases.join(', ')}`);
     if (sortedLanguages.length > 1) {

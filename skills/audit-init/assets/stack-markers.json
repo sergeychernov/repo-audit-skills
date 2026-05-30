@@ -1,37 +1,52 @@
 {
   "frameworks": {
-    "react": ["react", "react-dom", "react-native"],
-    "vue": ["vue", "nuxt", "@nuxt/kit"],
-    "angular": ["@angular/core"],
-    "svelte": ["svelte", "@sveltejs/kit"],
-    "next": ["next"],
-    "remix": ["@remix-run/node", "@remix-run/react"],
-    "fastify": ["fastify"],
-    "express": ["express"],
-    "nestjs": ["@nestjs/core"],
-    "hono": ["hono"],
-    "django": ["django"],
-    "flask": ["flask"],
-    "fastapi": ["fastapi"],
-    "spring": ["org.springframework:spring-core"]
+    "react": { "packages": ["react", "react-dom", "react-native"] },
+    "vue": { "packages": ["vue", "nuxt", "@nuxt/kit"] },
+    "angular": { "packages": ["@angular/core"] },
+    "svelte": { "packages": ["svelte", "@sveltejs/kit"] },
+    "nextjs": {
+      "packages": [
+        "next",
+        "@next/env",
+        "eslint-config-next",
+        "@next/eslint-plugin-next"
+      ],
+      "files": [
+        "next.config.js",
+        "next.config.mjs",
+        "next.config.ts",
+        "next.config.mts",
+        "next-env.d.ts"
+      ],
+      "scriptPatterns": ["\\bnext\\s+(dev|build|start|lint)\\b"]
+    },
+    "remix": { "packages": ["@remix-run/node", "@remix-run/react"] },
+    "fastify": { "packages": ["fastify"] },
+    "express": { "packages": ["express"] },
+    "nestjs": { "packages": ["@nestjs/core"] },
+    "hono": { "packages": ["hono"] },
+    "django": { "packages": ["django"], "files": ["manage.py"] },
+    "flask": { "packages": ["flask"] },
+    "fastapi": { "packages": ["fastapi"] },
+    "spring": { "packages": ["org.springframework:spring-core"] }
   },
   "bundlers": {
-    "webpack": ["webpack"],
-    "rspack": ["@rspack/core", "@rsbuild/core"],
-    "vite": ["vite"],
-    "esbuild": ["esbuild"],
-    "rollup": ["rollup"],
-    "parcel": ["parcel"],
-    "turbo": ["turbo"]
+    "webpack": { "packages": ["webpack"] },
+    "rspack": { "packages": ["@rspack/core", "@rsbuild/core"] },
+    "vite": { "packages": ["vite"] },
+    "esbuild": { "packages": ["esbuild"] },
+    "rollup": { "packages": ["rollup"] },
+    "parcel": { "packages": ["parcel"] },
+    "turbo": { "packages": ["turbo"] }
   },
   "testRunners": {
-    "jest": ["jest", "@jest/core"],
-    "vitest": ["vitest"],
-    "mocha": ["mocha"],
-    "playwright": ["@playwright/test", "playwright"],
-    "cypress": ["cypress"],
-    "pytest": ["pytest"],
-    "go-test": ["testing"]
+    "jest": { "packages": ["jest", "@jest/core"] },
+    "vitest": { "packages": ["vitest"] },
+    "mocha": { "packages": ["mocha"] },
+    "playwright": { "packages": ["@playwright/test", "playwright"] },
+    "cypress": { "packages": ["cypress"] },
+    "pytest": { "packages": ["pytest"] },
+    "go-test": { "packages": ["testing"] }
   },
   "linters": {
     "eslint": ["eslint"],

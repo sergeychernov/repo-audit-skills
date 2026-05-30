@@ -91,19 +91,25 @@
           }
         },
         "frameworks": {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 },
-          "uniqueItems": true
+          "type": "object",
+          "description": "Framework id → detected semver (null when unknown)",
+          "additionalProperties": {
+            "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          }
         },
         "bundlers": {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 },
-          "uniqueItems": true
+          "type": "object",
+          "description": "Bundler id → detected semver (null when unknown)",
+          "additionalProperties": {
+            "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          }
         },
         "testRunners": {
-          "type": "array",
-          "items": { "type": "string", "minLength": 1 },
-          "uniqueItems": true
+          "type": "object",
+          "description": "Test runner id → detected semver (null when unknown)",
+          "additionalProperties": {
+            "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }]
+          }
         },
         "linters": {
           "type": "array",

@@ -5,10 +5,15 @@
   "description": "Tech-debt report written by audit-debt into .audit/reports/debt.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "generatedAt", "profile", "score", "checksRun", "findings", "scoring"],
+  "required": ["version", "generatedAt", "generatedBy", "profile", "score", "checksRun", "findings", "scoring"],
   "properties": {
     "version": { "type": "integer", "minimum": 1 },
     "generatedAt": { "type": "string", "format": "date-time" },
+    "generatedBy": {
+      "type": "string",
+      "format": "uri",
+      "description": "Git URL of the repo-audit-skills catalog that produced this artifact"
+    },
     "scoring": {
       "type": "object",
       "additionalProperties": false,

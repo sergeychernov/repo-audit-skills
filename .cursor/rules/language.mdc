@@ -1,0 +1,38 @@
+---
+description: Documentation and code comments must be written in English
+alwaysApply: true
+---
+
+# Language — English only
+
+Write **documentation** and **code comments** in English.
+
+## In scope
+
+- `README.md`, `SKILL.md` body, `agents/*.md`, `.cursor/rules/*.mdc`
+- JSON Schema `description` fields, asset `doc` strings
+- Script headers, inline comments, CLI help text, error messages in scripts
+- Commit messages follow the separate Russian Conventional Commits rule when the user asks for commits
+
+## Out of scope
+
+- Chat replies to the user (follow the user's language preference)
+- Russian trigger phrases inside a skill's YAML `description` frontmatter (agent discovery only — see `skills.mdc`)
+
+## Examples
+
+```markdown
+<!-- ✅ GOOD -->
+Skills are compatible with ide-agents: nested layout under `skills/`.
+
+<!-- ❌ BAD -->
+Скиллы совместимы с ide-agents: nested layout под `skills/`.
+```
+
+```javascript
+// ✅ GOOD — stamp catalog provenance on every artifact
+generatedBy: GENERATED_BY,
+
+// ❌ BAD
+// URL каталога скиллов
+```

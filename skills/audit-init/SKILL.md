@@ -85,6 +85,7 @@ Open `.audit/profile.json`. Key fields:
 
 | Field | Meaning |
 |-------|---------|
+| `generatedBy` | Git URL of the repo-audit-skills catalog |
 | `repo.primaryLanguage` | Dominant language by tracked source files |
 | `repo.monorepo` | Workspaces / lerna / nx / turbo / multiple package.json |
 | `stack.runtime.node` | From `.nvmrc`, `.node-version`, or `engines.node` |

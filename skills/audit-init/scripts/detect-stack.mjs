@@ -14,6 +14,8 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join, basename } from 'node:path';
 import { argv, exit } from 'node:process';
 
+import { GENERATED_BY } from '../../_shared/generated-by.mjs';
+
 const here = dirname(fileURLToPath(import.meta.url));
 const assetsDir = join(here, '..', 'assets');
 const markers = JSON.parse(readFileSync(join(assetsDir, 'stack-markers.json'), 'utf8'));
@@ -390,6 +392,7 @@ function omitUndefined(obj) {
 const profile = {
     version: 4,
     generatedAt: new Date().toISOString(),
+    generatedBy: GENERATED_BY,
     repo: {
         name: basename(repoRoot),
         root: repoRoot,

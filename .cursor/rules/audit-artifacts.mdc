@@ -26,6 +26,7 @@ JSON Schemas live **only in this catalog** under `skills/<skill>/assets/*.schema
 | Format | `JSON.stringify(data, null, 2) + '\n'` |
 | Schema | `skills/<skill>/assets/<artifact>.schema.json` — source of truth in the skill folder |
 | Validation | Scripts validate against the skill's schema before writing to `.audit/` |
+| Provenance | Every artifact includes `generatedBy`: `https://github.com/sergeychernov/repo-audit-skills.git` (import from `skills/_shared/generated-by.mjs`) |
 | Read order | Downstream skills read `.audit/profile.json` first; never re-detect stack |
 
 ## Git

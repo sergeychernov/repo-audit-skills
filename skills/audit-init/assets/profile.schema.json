@@ -34,7 +34,7 @@
     }
   },
   "additionalProperties": false,
-  "required": ["version", "generatedAt", "repo", "languages", "stack", "audit"],
+  "required": ["version", "generatedAt", "generatedBy", "repo", "languages", "stack", "audit"],
   "properties": {
     "version": {
       "type": "integer",
@@ -45,6 +45,11 @@
       "type": "string",
       "format": "date-time",
       "description": "ISO-8601 timestamp when the profile was generated"
+    },
+    "generatedBy": {
+      "type": "string",
+      "format": "uri",
+      "description": "Git URL of the repo-audit-skills catalog that produced this artifact"
     },
     "repo": {
       "type": "object",

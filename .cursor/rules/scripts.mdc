@@ -47,4 +47,6 @@ Human mode: short labeled summary for terminal. JSON mode: `{ profile, profilePa
 
 Write `.audit/*.json` with 2-space indent and trailing newline. Validate against `assets/*.schema.json` in the skill folder before write — do not copy schemas into `.audit/`.
 
+Stamp every artifact with `generatedBy` from `skills/_shared/generated-by.mjs` alongside `version` and `generatedAt`.
+
 Extend detection lists in `assets/*.json` in this repo — never patch markers in the target project.

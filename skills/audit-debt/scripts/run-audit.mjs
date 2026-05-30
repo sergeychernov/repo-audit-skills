@@ -21,6 +21,7 @@ import { evalWhen } from './eval-when.mjs';
 import { computeScore, grade } from './compute-score.mjs';
 import { CHECK_RUNNERS } from './checks/index.mjs';
 import { loadStackMarkers, indexDeprecatedList } from './checks/stack-tools.mjs';
+import { GENERATED_BY } from '../../_shared/generated-by.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const assetsDir = join(here, '..', 'assets');
@@ -123,6 +124,7 @@ async function main() {
     const report = {
         version: 1,
         generatedAt: new Date().toISOString(),
+        generatedBy: GENERATED_BY,
         profile: {
             version: profile.version,
             generatedAt: profile.generatedAt,

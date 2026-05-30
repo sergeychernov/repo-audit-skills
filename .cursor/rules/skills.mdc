@@ -42,7 +42,7 @@ Scripts and assets live **inside the skill folder**, never in the target project
 4. **Workflow** — checkbox checklist
 5. **Agent instructions** — explicit steps for the agent (resolve SKILL_DIR, run script, read profile)
 
-Reference `.audit/profile.json` fields when the skill depends on `audit-init`. Report outputs go to `.audit/reports/*.json` — see `audit-artifacts.mdc`.
+Reference `.audit/profile.json` fields when the skill depends on `audit-init`. Report outputs go to `.audit/reports/*.json` — see `audit-artifacts.mdc`. Every artifact must include `generatedBy` from `skills/_shared/generated-by.mjs`.
 
 ## Agents (`agents/*.md`)
 

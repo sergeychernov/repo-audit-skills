@@ -2,7 +2,15 @@
 
 Skills and agents for repository audits — architecture, code smells, security, and more.
 
-Compatible with [ide-agents](https://github.com/sergeychernov/ide-agents): nested layout under `skills/`.
+## ide-agents
+
+Skills are compatible with [ide-agents](https://github.com/sergeychernov/ide-agents): nested layout under `skills/`, installed via symlinks (Global or Project).
+
+| | |
+|---|---|
+| Site | [ide-agents.vercel.app](https://ide-agents.vercel.app/) |
+| GitHub | [sergeychernov/ide-agents](https://github.com/sergeychernov/ide-agents) |
+| npm | [`ide-agents`](https://www.npmjs.com/package/ide-agents) |
 
 ## Skills
 
